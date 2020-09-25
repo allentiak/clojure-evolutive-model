@@ -14,7 +14,8 @@
                  (- (::mes fecha) 1)
                  (::dia fecha))))
 
-(s/def ::dia pos-int?)
+(s/def ::dia
+  (s/and pos-int? (s/int-in 1 32)))
 
 (s/def ::mes
   (s/and pos-int? (s/int-in 1 13)))
@@ -41,14 +42,18 @@
 (defn fecha [dia mes anio]
   {::dia dia ::mes mes ::anio anio})
 
-(defn dia-mes-anio-valido? [dia mes anio]
-  true)
+(defn dia-mes-anio-valido?
+  [dia mes anio]
+  (cond
+    (or (= (mes 11) (= (mes 4) (= (mes 6)) (= (mes 9))))) (<= dia 30)
+    (= (mes 2)) (<= dia 28)
+    :else (<= dia 31)))
 
 (def generador-fecha
   (gen/fmap #(apply fecha %)
             (gen/such-that
              #(apply dia-mes-anio-valido? %)
              (gen/tuple
-              (s/gen (s/and pos-int? (s/int-in 1 32)))
+              (s/gen ::dia)
               (s/gen ::mes)
               (s/gen pos-int?)))))
